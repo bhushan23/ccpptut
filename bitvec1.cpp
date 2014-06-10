@@ -10,8 +10,8 @@ class bitvec{
 public:
 	int size;
 	bvec *bv;
-	 bitvec();
-	 bitvec(int);
+	bitvec();
+	bitvec(int);
 	void push_bit();
 	void push_bit(int);
 	void set_bit(int);
@@ -21,9 +21,10 @@ public:
 	bool * bbegin();
 	bool * bend();
     void operator=(bitvec);
-     bitvec(const bitvec &);
+    bitvec(const bitvec &);
+	
 	bool& operator[] (int i){
-            bool *ptr=&(bv->value)+i;
+           bool *ptr=&(bv->value)+i;
             return *ptr;
 	}
 
@@ -292,7 +293,7 @@ int main(){
 	  b2.show_bit();
 	  orbit.show_bit();
 
-	  cout<<" XOR.. \n";
+	  cout<<"\n XOR.. \n";
       bitvec xorbit= b1 / b2;
 	  b1.show_bit();
 	  b2.show_bit();
