@@ -20,12 +20,12 @@ public:
 	bool query_bit(int);
 	bool * bbegin();
 	bool * bend();
-    void operator=(bitvec);
+    void operator=(bitvec &);
     bitvec(const bitvec &);
-	
+
 	bool& operator[] (int i){
            bool *ptr=&(bv->value)+i;
-            return *ptr;
+           return *ptr;
 	}
 
 	~bitvec(){
@@ -235,8 +235,9 @@ bitvec operator/(bitvec &b1,bitvec &b2){
 	return ansvec;
 }
 
-void bitvec :: operator=(bitvec b2){
+void bitvec :: operator=(bitvec &b2){
     int i;
+    cout<<"\ninside =";
     delete(bv);
     size=b2.size;
     bv=(bvec *) :: operator new (sizeof(bvec)*b2.size);
@@ -277,9 +278,10 @@ int main(){
 	  cout<<"\n"<<bv1[0].query_bit(1)<<"\n";
  	  bv1[0].show_bit();
 	  bv1[1].show_bit();
-	  cout<<"copy constructor..\n";
-	  b1=bitvec(bv1[0]);
-	  b2=bitvec(bv1[1]);
+
+	  cout<<"= overloading\n";
+	  b1=bv1[0];
+	  b2=bv1[1];
 
 	  cout<<" AND.. \n";
 	  bitvec andbit= b1 ^ b2;
@@ -293,7 +295,7 @@ int main(){
 	  b2.show_bit();
 	  orbit.show_bit();
 
-	  cout<<"\n XOR.. \n";
+	  cout<<" XOR.. \n";
       bitvec xorbit= b1 / b2;
 	  b1.show_bit();
 	  b2.show_bit();
@@ -302,10 +304,6 @@ int main(){
 	  cout<<"subscript overloading\n";
  	  cout<< bv1[0][1] << "  "<<bv1[0][4];
       cout<<"\n";
-
- 	  cout<<"= overloading\n";
- 	  bv1[0]=bv1[1];
- 	  bv1[0].show_bit();
 
       cout<<"\niterator.. b1\n ";
       bool *i;
@@ -317,5 +315,7 @@ int main(){
       cout<<*i;
        }
        cout<<"\n";
+
+
  	 return 0;
 }
