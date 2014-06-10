@@ -306,7 +306,7 @@ int main(){
  	  bv1[0]=bv1[1];
  	  bv1[0].show_bit();
 
-      cout<<"\niterator.. b1 ";
+      cout<<"\niterator.. b1\n ";
       bool *i;
       for( i=b1.bbegin();i<b1.bend();i++){
       cout<<*i;
