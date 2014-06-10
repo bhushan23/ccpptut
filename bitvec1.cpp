@@ -13,6 +13,7 @@ public:
 	 bitvec();
 	 bitvec(int);
 	void push_bit();
+	void push_bit(int);
 	void set_bit(int);
 	void clear_bit(int);
 	void show_bit();
@@ -34,15 +35,7 @@ public:
 
     }
 };
-/*
-class bititerator{
-public:
-     bool& begin(bitvec &b1){
-         bool *a= (&(b1.bv->value));
-         return a;
-    }
 
-};*/
 bool * bitvec :: bbegin(){
          return (&(bv->value));
     }
@@ -112,7 +105,35 @@ void bitvec :: push_bit(){
 
 }
 
+void bitvec :: push_bit(int inc){
+	int o_size=size,i;
+	bvec *tv;
+	while(inc > 0){//until required pushbits are alloted multiplies
+        inc-=size;
+        size*=2;
+    }
+	tv=(bvec *) :: operator new (sizeof(bvec)*size);
+	bool *ptr=&(bv->value);
+	bool *newtemp=&(tv->value);
+	bool *temp=ptr;
 
+
+	for(i=0;i<o_size;i++){
+		ptr=temp+i;
+		*newtemp=*ptr;
+		newtemp+=sizeof(bvec);
+	}
+	for(i=o_size;i<size;i++){
+		*newtemp=false;
+		newtemp+=sizeof(bvec);
+
+	}
+	delete(bv);
+	bv=tv;
+	show_bit();
+
+
+}
 
 void bitvec :: set_bit(int bn){
 	bool *ptr=&(bv->value)+bn;
@@ -231,16 +252,17 @@ void bitvec :: operator=(bitvec b2){
 
 int main(){
 
-	  bitvec bv1[2]=bitvec();// (bitvec *):: operator new (sizeof(bitvec)*size);
+	  bitvec bv1[2]=bitvec();
       bitvec b1,b2;
+      cout<<"\n..1..\n";
 	  bv1[0].show_bit();
 	  bv1[0].set_bit(0);
 	  bv1[0].set_bit(1);
 	  bv1[0].show_bit();
 	  bv1[0].set_bit(5);
 	  bv1[0].show_bit();
-	    bv1[0].clear_bit(5);
-	  bv1[0].push_bit();
+      bv1[0].clear_bit(5);
+	  bv1[0].push_bit(1);
 
 	  cout<<"\n..2..\n";
 	  bv1[1].show_bit();
@@ -249,50 +271,50 @@ int main(){
 	  bv1[1].show_bit();
 	  bv1[1].set_bit(5);
 
-	cout<<"\n"<<bv1[0].query_bit(2);
-	cout<<"\n"<<bv1[0].query_bit(0);
-	cout<<"\n"<<bv1[0].query_bit(1)<<"\n";
- 	 bv1[0].show_bit();
-	 bv1[1].show_bit();
-	cout<<"copy constructor..\n";
+	  cout<<"\n"<<bv1[0].query_bit(2);
+	  cout<<"\n"<<bv1[0].query_bit(0);
+	  cout<<"\n"<<bv1[0].query_bit(1)<<"\n";
+ 	  bv1[0].show_bit();
+	  bv1[1].show_bit();
+	  cout<<"copy constructor..\n";
 	  b1=bitvec(bv1[0]);
 	  b2=bitvec(bv1[1]);
-	  cout<<" AND.. \n";
 
+	  cout<<" AND.. \n";
 	  bitvec andbit= b1 ^ b2;
 	  b1.show_bit();
 	  b2.show_bit();
 	  andbit.show_bit();
-	 cout<<"\n OR.. \n";
 
-     bitvec orbit= b1  + b2;
-     b1.show_bit();
+	  cout<<"\n OR.. \n";
+      bitvec orbit= b1  + b2;
+      b1.show_bit();
 	  b2.show_bit();
-	 orbit.show_bit();
-	 cout<<" XOR.. \n";
+	  orbit.show_bit();
 
-	 bitvec xorbit= b1 / b2;
+	  cout<<" XOR.. \n";
+      bitvec xorbit= b1 / b2;
 	  b1.show_bit();
 	  b2.show_bit();
-	 xorbit.show_bit();
-	 cout<<"subscript overloading\n";
- 	 cout<< bv1[0][1] << "  "<<bv1[0][4];
-     cout<<"\n";
- 	 cout<<"= overloading\n";
- 	 bv1[0]=bv1[1];
- 	 bv1[0].show_bit();
+	  xorbit.show_bit();
 
+	  cout<<"subscript overloading\n";
+ 	  cout<< bv1[0][1] << "  "<<bv1[0][4];
+      cout<<"\n";
+
+ 	  cout<<"= overloading\n";
+ 	  bv1[0]=bv1[1];
+ 	  bv1[0].show_bit();
+
+      cout<<"\niterator.. b1 ";
       bool *i;
-  cout<<"\niterator.. b1 ";
-   for( i=b1.bbegin();i<b1.bend();i++){
-    cout<<*i;
-   }
-
-     cout<<"\n.. b2 ";
-   for( i=b2.bbegin();i<b2.bend();i++){
-    cout<<*i;
-   }
-   cout<<"\n";
+      for( i=b1.bbegin();i<b1.bend();i++){
+      cout<<*i;
+        }
+      cout<<"\n.. b2 ";
+      for( i=b2.bbegin();i<b2.bend();i++){
+      cout<<*i;
+       }
+       cout<<"\n";
  	 return 0;
-
 }
