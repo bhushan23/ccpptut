@@ -1,6 +1,6 @@
 #include <iostream>
-#include <limits>
 #define BITS 32
+
 using namespace std;
 class bitvec{
     public:
@@ -9,12 +9,18 @@ class bitvec{
         int *bb;
         bitvec();
         bitvec(int );
+        bitvec(const bitvec &);
+        ~bitvec();
         void push_bit(bool);
         void show_bit();
         void set_bit(int);
         void clear_bit(int);
         bool query_bit(int);
         bitvec& operator&(bitvec&);
+        bitvec& operator|(bitvec&);
+        bitvec& operator^(bitvec&);
+        void operator=(bitvec&);
+        bool operator[](int);
 };
 bitvec::bitvec(){
     blocks=1;
@@ -29,10 +35,22 @@ bitvec::bitvec(int s){
     for(int i=0;i<blocks;i++)
     bb[i]=0;
 }
+bitvec :: ~bitvec(){
+    delete(bb);
+}
+bitvec :: bitvec(const bitvec &b2){
+    blocks=b2.blocks;
+    index=b2.index;
+    bb=new int[blocks];
+    for(int i=0;i<blocks;i++){
+        bb[i]=b2.bb[i];
+    }
+}
 void bitvec::push_bit(bool val){
 
-    if(index >= blocks * sizeof(int)){
-            //expand
+    if(index >= blocks * BITS){
+            //double
+            cout<<"\ndoubling..\n";
             int i;
             int *bt=bb;
             bb=new int[blocks*2];
@@ -55,12 +73,13 @@ void bitvec::push_bit(bool val){
 }
 
 void bitvec :: show_bit(){
-    int mint=numeric_limits<int>::max(),ans;
-    cout<<index<<"\n";
-    for(int i=0;i<blocks;i++){
-        ans=bb[i] & mint;
-        cout<<"..."<<ans;
+   
+            for(int i=index-1;i>=0;i--){
+             cout<<query_bit(i);
+       
+             
     }
+    cout<<"\n";
 }
 
 void bitvec :: set_bit(int bn){
@@ -91,7 +110,7 @@ void bitvec :: clear_bit(int bn){
     bnum=bn/BITS;
 
     bb[bnum]=bb[bnum] & temp;
-    cout<<"..as"<<bb[bnum]<<"\n";
+    //cout<<"..as"<<bb[bnum]<<"\n";
 
     }
 }
@@ -107,7 +126,7 @@ bool bitvec :: query_bit(int bn){
     bnum=bn/BITS;
     temp=bb[bnum] & temp;
     temp=temp>>sval;
-    cout<<"..Bit is "<< temp<<"\n";
+   // cout<<"..Bit is "<< temp<<"\n";
     if(temp)
         return true;
     else
@@ -123,47 +142,133 @@ bitvec& bitvec :: operator&(bitvec& b2){
     lblocks= blocks < b2.blocks ? blocks : b2.blocks ;
     for(i=0;i<lblocks;i++){
         ansbv.bb[i]=bb[i]&b2.bb[i];
-        cout<<"\n..and of "<<bb[i] <<"  "<<b2.bb[i]<< " is "<<ansbv.bb[i];
+        //cout<<"\n..and of "<<bb[i] <<"  "<<b2.bb[i]<< " is "<<ansbv.bb[i];
     }
-
+return ansbv;
 }
+
 bitvec& bitvec :: operator|(bitvec& b2){
     int hsize,i,lblocks;
     hsize = index > b2.index ? index : b2.index;
     static bitvec ansbv= bitvec(hsize);
-    lsize == index? ansbv.index=index : ansbv.index=b2.index;
+    hsize == index? ansbv.index=index : ansbv.index=b2.index;
     lblocks= blocks > b2.blocks ? blocks : b2.blocks ;
     for(i=0;i<lblocks;i++){
-        ansbv.bb[i]=bb[i]&b2.bb[i];
-        cout<<"\n..and of "<<bb[i] <<"  "<<b2.bb[i]<< " is "<<ansbv.bb[i];
+        ansbv.bb[i]=bb[i]|b2.bb[i];
+       // cout<<"\n..or of "<<bb[i] <<"  "<<b2.bb[i]<< " is "<<ansbv.bb[i];
     }
+return ansbv;
+}
+bitvec& bitvec :: operator^(bitvec& b2){
+    int hsize,i,lblocks;
+    hsize = index > b2.index ? index : b2.index;
+    static bitvec ansbv= bitvec(hsize);
+    hsize == index? ansbv.index=index : ansbv.index=b2.index;
+    lblocks= blocks > b2.blocks ? blocks : b2.blocks ;
+    for(i=0;i<lblocks;i++){
+        ansbv.bb[i]=bb[i]^b2.bb[i];
+       // cout<<"\n..or of "<<bb[i] <<"  "<<b2.bb[i]<< " is "<<ansbv.bb[i];
+    }
+return ansbv;
+}
+
+bool bitvec :: operator[](int in){
+    return (query_bit(in));
+}
+void bitvec :: operator=(bitvec &b2){
+    int i;
+    if(blocks < b2.blocks){
+        delete(bb);
+        bb=new int[b2.blocks];
+    }
+    for(i=0;i<b2.blocks;i++){
+        bb[i]=b2.bb[i];
+    }
+    if(blocks > b2.blocks){
+        for(i=b2.blocks;i<blocks;i++){
+            bb[i]=0;
+        }
+    }
+
+
+    blocks=b2.blocks;
+    index=b2.index;
+
 
 }
 
+
 int main(){
-bitvec bv=bitvec();
 bitvec bv1=bitvec();
-bv.push_bit(true);
-bv.push_bit(false);
-bv.push_bit(true);
-bv.push_bit(true);
-bv.query_bit(1);
-bv.clear_bit(2);
-bv.show_bit();
-bv1.push_bit(true);
-bv1.push_bit(false);
-bv1.push_bit(true);
-bv1.push_bit(true);
-bv&bv1;
-/*
-int a=4,b=5;
-int c=a&b;
-cout<<c<<"\n";
-cout<<"  "<< sizeof(bv.bb)<<"  "<<sizeof(bv.bb[0])<<"  ";
-//cout<<bv.blocks<<" "<<bv.bb[0];
+bitvec bv2=bitvec();
+bitvec bv3=bitvec();
+bitvec bv4=bitvec();
+//bitvec b11=bitvec(bv);
 
-*/
+for(int i=0;i<8;i++){
+    bv1.push_bit(false);
+    bv2.push_bit(false);
+    bv3.push_bit(false);
+    bv4.push_bit(false);
+}
+bv1.set_bit(1);
+bv1.set_bit(2);
+bv1.set_bit(3);
+bv1.set_bit(7);
+bv1.set_bit(4);
+bv1.clear_bit(7);
+
+bv2.set_bit(1);
+bv2.set_bit(3);
+bv2.set_bit(4);
+bv2.set_bit(5);
+
+bv3.set_bit(1);
+bv3.set_bit(2);
+bv3.set_bit(3);
+bv3.set_bit(7);
+
+bv4.set_bit(1);
+bv4.set_bit(2);
+bv4.set_bit(3);
+bv4.set_bit(5);
+
+bitvec bans=bitvec();
+
+bans=bv1&bv2&bv3&bv4;
+cout<<"\nAND\n";
+bv1.show_bit();
+bv2.show_bit();
+bv3.show_bit();
+bv4.show_bit();
+cout<<"----------\n";
+bans.show_bit();
+
+bans=bv1|bv2|bv3|bv4;
+cout<<"\nOR\n";
+bv1.show_bit();
+bv2.show_bit();
+bv3.show_bit();
+bv4.show_bit();
+cout<<"----------\n";
+bans.show_bit();
 
 
+bans=bv1^bv2^bv3^bv4;
+cout<<"\nXOR\n";
+bv1.show_bit();
+bv2.show_bit();
+bv3.show_bit();
+bv4.show_bit();
+cout<<"----------\n";
+bans.show_bit();
+
+cout<<"\n\n subscript Overloading \n";
+cout<<bv1[0]<<"   "<<bv1[1]<<"\n";
+
+for(int i=8;i<40;i++)
+    bv1.push_bit(false);
+ bv1.push_bit(true);
+bv1.show_bit();
 return 0;
 }
