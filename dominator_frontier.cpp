@@ -192,12 +192,12 @@ void graph :: cal_idom(){
     it=tmpset.begin();
     if( tmpset.size() == 1){
       idom[i]=*it;
-  
-    }else{
+    }else{//more than 2 predecessor
+      
       for(it = tmpset.begin() ; it != itend ; ++it){
 	cur= *it;
-	
 	set <int> :: iterator it1end = dominator[cur].end();
+
 	for(set <int> :: iterator it1 = dominator[cur].begin(); it1 != it1end; ++it1){
 	  cur1= *it1;
 
@@ -215,7 +215,7 @@ void graph :: cal_idom(){
       for(j = 0; j < removable.size(); ++j){
 	  alldom.erase(removable[j]);
       }
-      if(alldom.size() == 1){
+      if(alldom.size() == 1){//Can removal lead to only 1 node in alldom ? Otherwise assign first node of alldom to idom[i]
 	it=alldom.begin();
       	idom[i] = *it;
       }
