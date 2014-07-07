@@ -166,7 +166,13 @@ void graph :: find_dominator(int start, int end){
      
   }while( change_flag );
 }
-
+/* 
+ * Function : calculate Immediate Dominant of node
+ * Algorithm: Iterate Through all nodes
+ *               add dominanator set of all dominators of current node to set DSET
+ *               remove Repeating nodes from DSET
+ * Returns: void  
+ */
 void graph :: cal_idom(){
      
  
@@ -176,18 +182,17 @@ void graph :: cal_idom(){
   int isize=dominator.size();
   
   for( i = 0; i < isize; ++i){
-  
-  
+   
     set <int> alldom;
     set <int> tmpset = dominator[i];
     set <int> :: iterator itend = tmpset.end();
-    vector<bool> rpflag(adj_list.size(),0);
+    vector<int> removable;
 
     tmpset.erase(i);
     it=tmpset.begin();
     if( tmpset.size() == 1){
       idom[i]=*it;
-      //      cout<<" Only one idom "<<idom[i] ;
+  
     }else{
       for(it = tmpset.begin() ; it != itend ; ++it){
 	cur= *it;
@@ -195,53 +200,46 @@ void graph :: cal_idom(){
 	set <int> :: iterator it1end = dominator[cur].end();
 	for(set <int> :: iterator it1 = dominator[cur].begin(); it1 != it1end; ++it1){
 	  cur1= *it1;
-	  //cout<<"\n..working "<<cur;
-	  if(alldom.find(cur1) != alldom.end()){//repeated 
-	    rpflag[cur1]=true;
-	    //cout<<"\nrepeated "<<cur;
+
+	  if(alldom.find(cur1) != alldom.end()){//repeated nodes 
+	    removable.push_back(cur1);
+
 	  }else{
 	    alldom.insert(cur1);
-	    //  cout<<"\ninsert "<<cur;
 	  }
 	  
 	}
       }
       
     
-      for(j = 0; j < rpflag.size(); ++j){
-	if(rpflag[j] == true){
-	  alldom.erase(j);
-	}
+      for(j = 0; j < removable.size(); ++j){
+	  alldom.erase(removable[j]);
       }
       if(alldom.size() == 1){
 	it=alldom.begin();
       	idom[i] = *it;
       }
-    }
-      
-    
-    //cout<<" " <<alldom.size();
-    // print_set(alldom.begin(), alldom.end());
+    }   
   }
-
+  cout<<"\nIdom \n";
   for(i=0; i< idom.size(); ++i){
-    cout<<i<<" "<<idom[i]<<"\n";
+    cout<<i<<" : "<<idom[i]<<"\n";
   }
 	
 }
-/*
+/* 
  * Function : calculates Dominance frontier of all nodes
  * Algorithm : Nodes having more than 1 predecessor are selected,
  *             iterate through predecessor say temp:
  *                 until temp != idom(Current Node):    
  *                     Dominance_Frontier(temp) = Current Node
- *                     go to idom of temp 
- *                                       
+ *                     go to idom of temp                                        
  * Returns : void
- * */
+ */
 void graph :: cal_df(){
   int i,j,size,temp;
   size=adj_list.size();
+
   for(i = 0; i < size; ++i){
     if(adj_list[i].size() > 1){//predessessor 
       
