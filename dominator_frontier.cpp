@@ -10,7 +10,7 @@ class graph
   vector < vector <int> > adj_list;
   vector < bool > visited;
   vector < set<int> > dominator;
-
+  vector <int> idom;
 public:
   int counter;
   graph(int);
@@ -46,6 +46,7 @@ void graph :: create_node(){
   adj_list.push_back(temp);
   dominator.push_back(stemp);
   visited.push_back(false);
+  idom.push_back(-1);
 }
 
 graph :: graph(int n){
@@ -161,33 +162,102 @@ void graph :: find_dominator(int start, int end){
      
   }while( change_flag );
 }
-
+/*
 void graph :: cal_idom(){
-  int i=0,cur;
+  int i=0,cur,incur;
+  set <int> :: iterator it;
   for( i = 0; i < dominator.size(); ++i){
     set <int> :: iterator itend = dominator[i].end();
-    set <int> tmpset = dominator[i] , set_diff, tmp1;
+    set <int> tmpset = dominator[i] , set_diff, tmp1,tempop;
     tmpset.erase(i);
-    for(set <int> :: iterator it = tmpset.begin() ; it != itend ; ++it){
-      cur = *it;
-      set_diff = dominator[cur];
-      if ( cur  == i){
-	//break;
-      }else{
-	cout<<cur<<"  ";
-	for(set <int> :: iterator in_it = tmpset.begin() ; it != itend ; ++it){
-	  incur = *in_it;
-	  if( incur != i && incur != cur){
-	    
+    it=tmpset.begin();
+    if( tmpset.size() == 1){
+      idom[i]=*it;
+    }else{
+      for(it = tmpset.begin() ; it != itend ; ++it){
+	cur = *it;
+	set_diff = dominator[cur];
+	if ( cur  == i){
+	  //break;
+	}else{
+	  cout<<cur<<"  ";
+	  for(set <int> :: iterator in_it = tmpset.begin() ; it != itend ; ++it){
+	    incur = *in_it;
+	    if( incur != i && incur != cur){
+	      set_difference(set_diff.begin(),set_diff.end(),dominator[incur].begin(),dominator[i].end(),inserter(tempop,tempop.begin());
+			     set_diff=tempop;
+			     }
 	  }
-	}
 
+	}
       }
     }
     cout<<"\n";
   }
-}
+  }*/
 
+void graph :: cal_idom(){
+     
+ 
+  set <int> :: iterator it;
+  
+  int i,cur,j,cur1;
+  int isize=dominator.size();
+  cout<<"\ninside whole "<<isize;
+  for( i = 0; i < isize; ++i){
+    cout<<"\ninside "<<i;
+  
+    set <int> alldom;
+    set <int> tmpset = dominator[i];
+    set <int> :: iterator itend = tmpset.end();
+    vector<bool> rpflag(adj_list.size(),0);
+
+    tmpset.erase(i);
+    it=tmpset.begin();
+    if( tmpset.size() == 1){
+      idom[i]=*it;
+      //      cout<<" Only one idom "<<idom[i] ;
+    }else{
+      for(it = tmpset.begin() ; it != itend ; ++it){
+	cur= *it;
+	
+	set <int> :: iterator it1end = dominator[cur].end();
+	for(set <int> :: iterator it1 = dominator[cur].begin(); it1 != it1end; ++it1){
+	  cur1= *it1;
+	  //cout<<"\n..working "<<cur;
+	  if(alldom.find(cur1) != alldom.end()){//repeated 
+	    rpflag[cur1]=true;
+	    //cout<<"\nrepeated "<<cur;
+	  }else{
+	    alldom.insert(cur1);
+	    //  cout<<"\ninsert "<<cur;
+	  }
+	  
+	}
+      }
+      
+    
+      for(j = 0; j < rpflag.size(); ++j){
+	if(rpflag[j] == true){
+	  alldom.erase(j);
+	}
+      }
+      if(alldom.size() == 1){
+	it=alldom.begin();
+      	idom[i] = *it;
+      }
+    }
+      
+    
+    //cout<<" " <<alldom.size();
+    // print_set(alldom.begin(), alldom.end());
+  }
+
+  for(i=0; i< idom.size(); ++i){
+    cout<<i<<" "<<idom[i]<<"\n";
+  }
+	
+}
 int main()
 {
   int i,n,temp,nodei,src=1;
