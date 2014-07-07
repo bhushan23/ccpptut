@@ -11,6 +11,7 @@ class graph
   vector < bool > visited;
   vector < set<int> > dominator;
   vector <int> idom;
+  vector < set <int> > df;
 public:
   int counter;
   graph(int);
@@ -26,6 +27,8 @@ public:
     return visited[i];
   }
   void cal_idom();
+  void cal_df();
+  void print_df();
   set<int> :: iterator get_beg_dominator(int i){
     return dominator[i].begin();
   }
@@ -47,6 +50,7 @@ void graph :: create_node(){
   dominator.push_back(stemp);
   visited.push_back(false);
   idom.push_back(-1);
+  df.push_back(stemp);
 }
 
 graph :: graph(int n){
@@ -162,39 +166,6 @@ void graph :: find_dominator(int start, int end){
      
   }while( change_flag );
 }
-/*
-void graph :: cal_idom(){
-  int i=0,cur,incur;
-  set <int> :: iterator it;
-  for( i = 0; i < dominator.size(); ++i){
-    set <int> :: iterator itend = dominator[i].end();
-    set <int> tmpset = dominator[i] , set_diff, tmp1,tempop;
-    tmpset.erase(i);
-    it=tmpset.begin();
-    if( tmpset.size() == 1){
-      idom[i]=*it;
-    }else{
-      for(it = tmpset.begin() ; it != itend ; ++it){
-	cur = *it;
-	set_diff = dominator[cur];
-	if ( cur  == i){
-	  //break;
-	}else{
-	  cout<<cur<<"  ";
-	  for(set <int> :: iterator in_it = tmpset.begin() ; it != itend ; ++it){
-	    incur = *in_it;
-	    if( incur != i && incur != cur){
-	      set_difference(set_diff.begin(),set_diff.end(),dominator[incur].begin(),dominator[i].end(),inserter(tempop,tempop.begin());
-			     set_diff=tempop;
-			     }
-	  }
-
-	}
-      }
-    }
-    cout<<"\n";
-  }
-  }*/
 
 void graph :: cal_idom(){
      
@@ -203,9 +174,9 @@ void graph :: cal_idom(){
   
   int i,cur,j,cur1;
   int isize=dominator.size();
-  cout<<"\ninside whole "<<isize;
+  
   for( i = 0; i < isize; ++i){
-    cout<<"\ninside "<<i;
+  
   
     set <int> alldom;
     set <int> tmpset = dominator[i];
@@ -258,6 +229,47 @@ void graph :: cal_idom(){
   }
 	
 }
+/*
+ * Function : calculates Dominance frontier of all nodes
+ * Algorithm : Nodes having more than 1 predecessor are selected,
+ *             iterate through predecessor say temp:
+ *                 until temp != idom(Current Node):    
+ *                     Dominance_Frontier(temp) = Current Node
+ *                     go to idom of temp 
+ *                                       
+ * Returns : void
+ * */
+void graph :: cal_df(){
+  int i,j,size,temp;
+  size=adj_list.size();
+  for(i = 0; i < size; ++i){
+    if(adj_list[i].size() > 1){//predessessor 
+      
+      for(j = 0; j < adj_list[i].size(); ++j){
+	temp = adj_list[i][j];
+	
+	while( temp != idom[i] ){
+	  df[temp].insert(i);
+	  temp=idom[temp];
+	  if(temp == -1)//-1 is for node having no idom
+	    break;
+	}
+      }
+
+    }
+  }
+  cout<<"DF \n";
+  print_df();
+}
+
+void graph :: print_df(){
+  int i;
+  int size=df.size();
+  for(i = 0; i < size; ++i){
+    cout<<"\n"<<i<<" : ";
+    print_set(df[i].begin(),df[i].end());
+  }
+}
 int main()
 {
   int i,n,temp,nodei,src=1;
@@ -281,5 +293,6 @@ int main()
   cout<<g1.counter<<"\n";
   g1.print_dominator();
   g1.cal_idom();
+  g1.cal_df();
   return 0;
 }
