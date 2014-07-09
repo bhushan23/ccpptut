@@ -13,7 +13,7 @@ class graph
   vector < vector <int> > adj_list;
   vector < bool > visited;
   vector < set<int> > dominator;
-  vector < bool > dominator_bit;
+  vector < set <int> > loop_vector;
   vector <int> idom;
   vector < set <int> > df;
   
@@ -32,13 +32,14 @@ public:
   bool dset_available(int i){
     return visited[i];
   }
+  
   bool dominator_check(int,int);
   void cal_idom();
   void natural_loop();
   void cal_df();
   void print_df();
-
-  
+  void print_all_loops();
+  void add_loop_member(int,int);
   set<int> :: iterator get_beg_dominator(int i){
     return dominator[i].begin();
   }
@@ -77,10 +78,7 @@ graph :: graph(int n){
     create_node();
     dominator[i].insert(i);
   }
-  int total_bool_block= n/8 + 1;
-  while( total_bool_block-- ){
-    dominator_bit.push_back(false);
-  }
+ 
 }
 int graph :: get_dest(int i,int j){
   if(j < adj_list[i].size())
@@ -226,47 +224,65 @@ void graph :: find_dominator(int start, int end){
   
 }
 
-//void graph :: add_loop_predecessor(int src, int tail, )
+
 
 void graph :: add_loop_member(int src,int tail){
 
   set <int> loop;
-  int size= adj_list.size();
-  bitset <size> flag;
+  int sizel= adj_list.size();
+  vector <bool> flag(sizel,false);
   queue <int> itq;
+  int i,elem;
   
   loop.insert(src);
   loop.insert(tail);
-  flag.set(src);
-  flag.set(tail);
+  flag[src] = true;
+  flag[tail] = true;
 
   for(i = 0;i < adj_list[i].size(); ++i){
     itq.push( adj_list[tail][i] );
   }
-  //add_loop_predecessor(src, tail, loop, flag);
+
 
   while( !itq.empty() ){
-    elem = itq.pop();
-    if( !flag.test(elem) ){
-      flag.set(elem);
+    elem = itq.front();
+    if( !flag[elem] ){
+      flag[elem] = true;
+      loop.insert(elem);
       for(i = 0;i < adj_list[elem].size(); ++i){
 	itq.push( adj_list[elem][i] );
-  }
+      }
     }
   }
-  
+
+  loop_vector.push_back(loop);
 }
 
-void graph :: natual_loop(){
-  int i,size=adj_list.size();
+void graph :: natural_loop(){
+  int i,j,lsize,size=adj_list.size();
   for(i = 0;i < size;++i){
     lsize = adj_list[i].size();
     for(j = 0;j < lsize; ++j){
       if( dominator_check( adj_list[i][j], i) ){//backedge exists
-	add_loop_members(i,adj_list[i][j]);
+	add_loop_member(i,adj_list[i][j]);
       }
     }
   }
+}
+
+void graph :: print_all_loops(){
+  int size = loop_vector.size();
+  set <int> :: iterator it,itend;
+  
+  for(int i = 0;i < size; ++i){
+    it = loop_vector[i].begin();
+    itend = loop_vector[i].end();
+    cout<<"\n Loop "<<i<<"\n";
+    for( ;it != itend; ++it){
+      cout<<" "<<*it;
+    }
+  }
+
 }
 /* 
  * Function : calculate Immediate Dominant of node
@@ -394,5 +410,8 @@ int main()
   g1.print_dominator();
   g1.cal_idom();
   g1.cal_df();
+  g1.natural_loop();
+  g1.print_all_loops();
+  
   return 0;
 }
