@@ -4,8 +4,6 @@
 #include <set>
 #include <cstdio>
 #include <algorithm>
-#include <bitset>
-#include "bitbool.h"
 #include <queue>
 
 using namespace std;
@@ -69,7 +67,7 @@ bool graph :: dominator_check(int tocheck, int inset){
   //int size=dominator[inset].size();
   if( dominator[inset]. find(tocheck) == dominator[inset].end())
     return false;
-    return true;
+  return true;
 }
 graph :: graph(int n){
   counter=0;
@@ -124,14 +122,14 @@ void print_set(set <int> :: iterator it, set <int> :: iterator end){
 
 bool graph :: intersect_dominator(){
   int total=adj_list.size();
-  int total_pred,pred;
+  int total_pred,pred,j;
   bool change_flag=false;
   counter++;
   for(int i = 0; i < total; ++i){
     set<int> result_set;
     total_pred=adj_list[i].size();
 
-    for(int j = 0; j < total_pred; ++j){
+    for( j = 0; j < total_pred; ++j){
 
       if(visited[adj_list[i][j]]){
 	result_set=get_dominator_list(adj_list[i][j]);
@@ -139,11 +137,11 @@ bool graph :: intersect_dominator(){
       }
     }
 
-    for(int j = 0; j < total_pred; ++j){
+    for(int k = j+1; k < total_pred; ++k){
 
       set<int> :: iterator it,itend;
       set<int>  temp,temp1;
-      pred = adj_list[i][j];
+      pred = adj_list[i][k];
 
       if( visited[pred] ){//if we have calculated dominator
 	itend = get_end_dominator(pred);
@@ -156,18 +154,18 @@ bool graph :: intersect_dominator(){
     }
 
     result_set.insert(i);
-    if(dominator[i] != result_set){
+    if(dominator[i].size() != result_set.size()){
       change_flag=true;
       dominator[i].clear();
       dominator[i] = result_set;
     }
     visited[i]=true;
   }
-   return change_flag;
+  return change_flag;
 }
 /*
 
-bool graph :: intersect_dominator_bit(vector <bitset < 6 >> &dom_bit){
+  bool graph :: intersect_dominator_bit(vector <bitset < 6 >> &dom_bit){
   int total=adj_list.size();
   int total_pred,pred;
   bool change_flag=false;
@@ -175,36 +173,36 @@ bool graph :: intersect_dominator_bit(vector <bitset < 6 >> &dom_bit){
 
   counter++;
   for(int i = 0; i < total; ++i){
-    total_pred=adj_list[i].size();
+  total_pred=adj_list[i].size();
 
-    if(total_pred == 1 && visited[adj_list[i][0]]){
-      tmpbit = dom_bit[i];
-      //dom_bit[i].reset();
-      dom_bit[i] = dom_bit[ adj_list[i][0] ];
+  if(total_pred == 1 && visited[adj_list[i][0]]){
+  tmpbit = dom_bit[i];
+  //dom_bit[i].reset();
+  dom_bit[i] = dom_bit[ adj_list[i][0] ];
 
-    }else{
-      tmpbit.reset();
-      tmpbit.flip();
+  }else{
+  tmpbit.reset();
+  tmpbit.flip();
 
-      for(int j = 0; j < total_pred; ++j){
-	pred = adj_list[i][j];
+  for(int j = 0; j < total_pred; ++j){
+  pred = adj_list[i][j];
 
-	if( visited[pred] ){//if we have calculated dominator
+  if( visited[pred] ){//if we have calculated dominator
 
-	  tmpbit = tmpbit & dom_bit[pred];
-	  tmpbit.set(i);
-	  dom_bit[i] = tmpbit;
-	}
-      }
-    }
+  tmpbit = tmpbit & dom_bit[pred];
+  tmpbit.set(i);
+  dom_bit[i] = tmpbit;
+  }
+  }
+  }
 
-    if(tmpbit != dom_bit[i]){
-      change_flag=true;
-    }
-    visited[i]=true;
-    }
-   return change_flag;
-   }*/
+  if(tmpbit != dom_bit[i]){
+  change_flag=true;
+  }
+  visited[i]=true;
+  }
+  return change_flag;
+  }*/
 /*
  * Iterate through graph until dominator set is unchanged
  */
@@ -223,7 +221,16 @@ void graph :: find_dominator(int start, int end){
   }while( change_flag );
 
 }
-
+/*
+ * Function : Adds Predecessors from Loop End Node to Loop Start Node
+ * Algorithm : push all predecessor's of End Node on Queue
+ *             while Queue is not empty
+ *                  pop from Queue into elem
+ *                  if elem is not visited
+ *                       mark elem as visited
+ *                       add all predecessor's of elem into Queue   
+ * Return : Void
+ */
 
 
 void graph :: add_loop_member(int src,int tail){
@@ -238,16 +245,16 @@ void graph :: add_loop_member(int src,int tail){
   loop.insert(tail);
   flag[src] = true;
   flag[tail] = true;
-//cout<<"\nsrc: "<<src<<" ta "<<tail<<"\n";
+  
   for(i = 0;i < adj_list[tail].size(); ++i){
     itq.push( adj_list[tail][i] );
-  //  cout<<adj_list[tail][i]<<"  pushed\n";
-    }
+
+  }
 
   while( !itq.empty() ){
     elem = itq.front();
     itq.pop();
-    //cout<<elem<<"  poped";
+   
     if( !flag[elem] ){
       flag[elem] = true;
       loop.insert(elem);
@@ -258,7 +265,13 @@ void graph :: add_loop_member(int src,int tail){
   }
   loop_vector.push_back(loop);
 }
-
+/*
+ * Function : detects natural loops
+ * Algorithm : Traverse through graph edges
+ *                if it is backedge
+ *                     find nodes which are part of this loop using add_loop_member function 
+ * Return: Void
+ */
 void graph :: natural_loop(){
   int i,j,lsize,size=adj_list.size();
   for(i = 0;i < size;++i){
@@ -330,9 +343,8 @@ void graph :: cal_idom(){
 	}
       }
 
-
       for(j = 0; j < removable.size(); ++j){
-	  alldom.erase(removable[j]);
+	alldom.erase(removable[j]);
       }
       if(alldom.size() == 1){//Can removal lead to only 1 node in alldom ? Otherwise assign first node of alldom to idom[i]
 	it=alldom.begin();
