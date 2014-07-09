@@ -4,14 +4,19 @@
 #include <set>
 #include <cstdio>
 #include <algorithm>
+#include <bitset>
+#include <queue>
+
 using namespace std;
 class graph
 {
   vector < vector <int> > adj_list;
   vector < bool > visited;
   vector < set<int> > dominator;
+  vector < bool > dominator_bit;
   vector <int> idom;
   vector < set <int> > df;
+  
 public:
   int counter;
   graph(int);
@@ -23,12 +28,17 @@ public:
   void find_dominator(int,int);
   void print_dominator();
   bool intersect_dominator();
+  bool intersect_dominator_bit();
   bool dset_available(int i){
     return visited[i];
   }
+  bool dominator_check(int,int);
   void cal_idom();
+  void natural_loop();
   void cal_df();
   void print_df();
+
+  
   set<int> :: iterator get_beg_dominator(int i){
     return dominator[i].begin();
   }
@@ -53,11 +63,23 @@ void graph :: create_node(){
   df.push_back(stemp);
 }
 
+bool graph :: dominator_check(int tocheck, int inset){
+  //int size=dominator[inset].size();
+  if( dominator[inset]. find(tocheck) != dominator[inset].end())
+    return true;
+  return false;
+
+}
 graph :: graph(int n){
   counter=0;
+
   for(int i=0;i<=n+1;i++){
     create_node();
     dominator[i].insert(i);
+  }
+  int total_bool_block= n/8 + 1;
+  while( total_bool_block-- ){
+    dominator_bit.push_back(false);
   }
 }
 int graph :: get_dest(int i,int j){
@@ -68,6 +90,7 @@ int graph :: get_dest(int i,int j){
 void graph :: create_edge( int src, int dest)
 {  
   adj_list[src].push_back(dest);
+  
 }
 int graph :: list_size(int i){
   return (adj_list[i].size());
@@ -144,27 +167,106 @@ bool graph :: intersect_dominator(){
   }
    return change_flag;
 }
+/*
 
+bool graph :: intersect_dominator_bit(vector <bitset < 6 >> &dom_bit){
+  int total=adj_list.size();
+  int total_pred,pred;
+  bool change_flag=false;
+  bitset <total_pred> tmpbit;
+      
+  counter++;
+  for(int i = 0; i < total; ++i){
+    total_pred=adj_list[i].size();
+
+    if(total_pred == 1 && visited[adj_list[i][0]]){
+      tmpbit = dom_bit[i];
+      //dom_bit[i].reset();
+      dom_bit[i] = dom_bit[ adj_list[i][0] ];
+      
+    }else{
+      tmpbit.reset();
+      tmpbit.flip();
+      
+      for(int j = 0; j < total_pred; ++j){
+	pred = adj_list[i][j];
+    
+	if( visited[pred] ){//if we have calculated dominator
+
+	  tmpbit = tmpbit & dom_bit[pred];
+	  tmpbit.set(i);
+	  dom_bit[i] = tmpbit;
+	}
+      }
+    }
+    
+    if(tmpbit != dom_bit[i]){
+      change_flag=true;
+    }
+    visited[i]=true;
+    }
+   return change_flag;
+   }*/
 /* 
  * Iterate through graph until dominator set is unchanged
  */
+
+
 
 void graph :: find_dominator(int start, int end){
   bool change_flag=false;
   create_edge(start,0);
   create_edge(end+1,end);
-  
+  int total= adj_list.size();
   do{//iterate until dominator set of all node is unchanged
     
     change_flag = intersect_dominator();
-    if(change_flag == false){//if dominator set is unchanged cross check
     
-      change_flag = intersect_dominator();
-      
-    }
-    
-     
   }while( change_flag );
+  
+}
+
+//void graph :: add_loop_predecessor(int src, int tail, )
+
+void graph :: add_loop_member(int src,int tail){
+
+  set <int> loop;
+  int size= adj_list.size();
+  bitset <size> flag;
+  queue <int> itq;
+  
+  loop.insert(src);
+  loop.insert(tail);
+  flag.set(src);
+  flag.set(tail);
+
+  for(i = 0;i < adj_list[i].size(); ++i){
+    itq.push( adj_list[tail][i] );
+  }
+  //add_loop_predecessor(src, tail, loop, flag);
+
+  while( !itq.empty() ){
+    elem = itq.pop();
+    if( !flag.test(elem) ){
+      flag.set(elem);
+      for(i = 0;i < adj_list[elem].size(); ++i){
+	itq.push( adj_list[elem][i] );
+  }
+    }
+  }
+  
+}
+
+void graph :: natual_loop(){
+  int i,size=adj_list.size();
+  for(i = 0;i < size;++i){
+    lsize = adj_list[i].size();
+    for(j = 0;j < lsize; ++j){
+      if( dominator_check( adj_list[i][j], i) ){//backedge exists
+	add_loop_members(i,adj_list[i][j]);
+      }
+    }
+  }
 }
 /* 
  * Function : calculate Immediate Dominant of node
@@ -271,7 +373,7 @@ void graph :: print_df(){
 int main()
 {
   int i,n,temp,nodei,src=1;
-  freopen("indom", "r", stdin);
+  freopen("inmih", "r", stdin);
   cin>>n;
   graph g1= graph(n);
   i=0;
